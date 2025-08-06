@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<functions>
+    <function>
+        <type>executable</type>
+        <name>unionFind</name>
+        <return_type>Array(Tuple(value String, root String))</return_type>
+        <return_name>result</return_name>
+        <argument>
+            <type>Array(Tuple(a String, b String))</type>
+            <name>edges</name>
+        </argument>
+        <format>JSONEachRow</format>
+        <command>bpuf-clickhouse --mode=unionfind</command>
+        <command_read_timeout>10000</command_read_timeout>
+        <command_write_timeout>10000</command_write_timeout>
+        <pool_size>10</pool_size>
+        <max_command_execution_time>10000</max_command_execution_time>
+    </function>
+    <function>
+        <type>executable</type>
+        <name>bipartiteUnionFind</name>
+        <return_type>Array(Tuple(u String, v_root String))</return_type>
+        <return_name>result</return_name>
+        <argument>
+            <type>Array(Tuple(u String, v String))</type>
+            <name>relations</name>
+        </argument>
+        <format>JSONEachRow</format>
+        <command>bpuf-clickhouse --mode=bipartite</command>
+        <command_read_timeout>10000</command_read_timeout>
+        <command_write_timeout>10000</command_write_timeout>
+        <pool_size>10</pool_size>
+        <max_command_execution_time>10000</max_command_execution_time>
+    </function>
+</functions>

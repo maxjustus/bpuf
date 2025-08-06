@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.22
+        cache: false
+    
+    - name: Run tests
+      run: go test -v ./...
+    
+    - name: Build multiplatform binaries
+      run: |
+        mkdir -p dist
+        
+        # Linux amd64
+        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o dist/bpuf-clickhouse-linux-amd64 ./cmd/bpuf-clickhouse
+        
+        # Linux arm64
+        GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o dist/bpuf-clickhouse-linux-arm64 ./cmd/bpuf-clickhouse
+        
+        # macOS amd64
+        GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o dist/bpuf-clickhouse-darwin-amd64 ./cmd/bpuf-clickhouse
+        
+        # macOS arm64 (Apple Silicon)
+        GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o dist/bpuf-clickhouse-darwin-arm64 ./cmd/bpuf-clickhouse
+    
+    - name: Generate XML config
+      run: |
+        ./dist/bpuf-clickhouse-linux-amd64 --udf-xml > dist/udfs.xml
+    
+    - name: Create checksums
+      run: |
+        cd dist
+        sha256sum * > checksums.txt
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/bpuf-clickhouse-*
+          dist/udfs.xml
+          dist/checksums.txt
+        generate_release_notes: true
+        draft: false
+        prerelease: false
